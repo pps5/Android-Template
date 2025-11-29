@@ -96,24 +96,13 @@ replace_placeholders() {
         return 0
     fi
 
-    echo "Found ${#files[@]} files with placeholders:"
-    printf '  %s\n' "${files[@]}"
-    echo
-
-    echo "Replacing placeholders with:"
-    echo "  {{project_name}} → $PROJECT_NAME"
-    echo "  {{project_name_snakecase}} → $PROJECT_NAME_SNAKECASE"
-    echo "  {{project_name_lowercase}} → $PROJECT_NAME_LOWERCASE"
-    echo "  {{application_id}} → $APPLICATION_ID"
-    echo
+    echo "Found ${#files[@]} files with placeholders"
 
     # Replace placeholders in each file
     local processed=0
 
     for file in "${files[@]}"; do
         if [[ -f "$file" ]]; then
-            echo "Processing: $file"
-
             # Replace placeholders using sed
             sed -i.tmp \
                 -e "s/{{project_name}}/$PROJECT_NAME/g" \
@@ -133,20 +122,16 @@ replace_placeholders() {
     done
 
     echo
-    echo "=== Placeholder Replacement Complete ==="
-    echo "  Processed: $processed files"
-    echo
-    echo "Files modified:"
-    printf '  %s\n' "${files[@]}"
+    echo "Processed: $processed files"
 }
 
-# Function to rename template directories to project_name_lowercase
+# Function to rename template directories to project_name_snakecase
 rename_template_directories() {
     echo "=== Renaming Template Directories ==="
 
-    # Check if PROJECT_NAME_LOWERCASE is set
-    if [[ -z "$PROJECT_NAME_LOWERCASE" ]]; then
-        echo "Error: PROJECT_NAME_LOWERCASE not set. Please run the setup first."
+    # Check if PROJECT_NAME_SNAKECASE is set
+    if [[ -z "$PROJECT_NAME_SNAKECASE" ]]; then
+        echo "Error: PROJECT_NAME_SNAKECASE not set. Please run the setup first."
         return 1
     fi
 
@@ -165,11 +150,9 @@ rename_template_directories() {
         return 0
     fi
 
-    echo "Found ${#template_dirs[@]} template directories:"
-    printf '  %s\n' "${template_dirs[@]}"
-    echo
+    echo "Found ${#template_dirs[@]} template directories"
 
-    echo "Renaming template directories to: $PROJECT_NAME_LOWERCASE"
+    echo "Renaming template directories to: $PROJECT_NAME_SNAKECASE"
 
     local renamed=0
 
@@ -177,11 +160,9 @@ rename_template_directories() {
     for ((i=${#template_dirs[@]}-1; i>=0; i--)); do
         local old_dir="${template_dirs[i]}"
         local parent_dir=$(dirname "$old_dir")
-        local new_dir="$parent_dir/$PROJECT_NAME_LOWERCASE"
+        local new_dir="$parent_dir/$PROJECT_NAME_SNAKECASE"
 
         if [[ -d "$old_dir" ]]; then
-            echo "Renaming: $old_dir → $new_dir"
-
             # Check if target directory already exists
             if [[ -d "$new_dir" ]]; then
                 echo "  ⚠ Warning: Target directory already exists: $new_dir"
@@ -199,17 +180,52 @@ rename_template_directories() {
     done
 
     echo
-    echo "=== Directory Renaming Complete ==="
-    echo "  Renamed: $renamed directories"
+    echo "Renamed: $renamed directories"
 
     if [[ $renamed -gt 0 ]]; then
         echo
         echo "Note: You may need to update import statements in your code files"
-        echo "to reflect the new package structure."
+        echo " to reflect the new package structure."
     fi
+}
+
+# Function to remove setup files
+remove_setup_files() {
+    echo "=== Removing Template Specific Files ==="
+
+    local files_to_remove=("setup.sh" "README.md")
+    local dirs_to_remove=(".git")
+    local removed=0
+
+    for file in "${files_to_remove[@]}"; do
+        if [[ -f "$file" ]]; then
+            if rm -f "$file"; then
+                echo "  ✓ Removed: $file"
+                ((removed++))
+            else
+                echo "  ✗ Failed to remove: $file"
+            fi
+        else
+            echo "  ⚠ File not found: $file"
+        fi
+    done
+
+    for dir in "${dirs_to_remove[@]}"; do
+        if [[ -d "$dir" ]]; then
+            if rm -rf "$dir"; then
+                echo "  ✓ Removed directory: $dir"
+                ((removed++))
+            else
+                echo "  ✗ Failed to remove directory: $dir"
+            fi
+        else
+            echo "  ⚠ Directory not found: $dir"
+        fi
+    done
 }
 
 # Main script execution
 read_from_stdin
 replace_placeholders
 rename_template_directories
+remove_setup_files
