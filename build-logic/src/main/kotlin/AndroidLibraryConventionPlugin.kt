@@ -17,9 +17,10 @@ internal class AndroidLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "org.jetbrains.kotlin.android")
 
             extensions.configure<LibraryExtension> {
-                compileSdk = 35
-                defaultConfig.minSdk = 30
-                defaultConfig.targetSdk = 35
+                compileSdk = projectLibs.findVersion("compileSdk").get().toString().toInt()
+                defaultConfig.minSdk = projectLibs.findVersion("minSdk").get().toString().toInt()
+                defaultConfig.targetSdk =
+                    projectLibs.findVersion("targetSdk").get().toString().toInt()
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
                 compileOptions.sourceCompatibility = JavaVersion.VERSION_11
