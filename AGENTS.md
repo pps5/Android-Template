@@ -12,11 +12,11 @@ The project follows a standard Android application structure.
 - domain: App-specific logic modules. Each submodule cannot depend on any other project non-domain modules
     - models: Model classes
     - repositories: Repository interfaces
-    - usecases: UseCase implementations
+    - usecases: UseCase implementations (optional)
 - infrastructure:
     - db: Database-related code packages such as DAOs and entities
     - file: File-related code packages
-    - openai: ChatGPT API-related code packages
+    - api: API-related code package
     - repositories: Repository implementation packages
 
 ## Coding Style Guidelines
